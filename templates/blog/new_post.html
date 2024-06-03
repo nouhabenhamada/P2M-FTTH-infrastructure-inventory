@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}home{% endblock  %}
+
+{% block content %}
+   <nav class="navbar navbar-expand-lg bg-body-tertiary">
+       <div class="container-fluid">
+            <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+               <a class="nav-link dropdown-toggle bg-primary text-light w-100" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                   <h5 class='font-monospace'>Menu</h5>
+               </a>
+               <ul class="dropdown-menu">
+                   <li><a class="dropdown-item" href="/new-post">Ajouter</a></li>
+                   <li><a class="dropdown-item" href="/signout">Déconnecter</a></li>
+               </ul>
+            </ul>
+            <img src="{% static "images/logo.png" %}" alt="Logo" style="max-height: 50px;">
+       </div>
+    </nav>
+    <br>
+    <form method='post'>
+        {% csrf_token %}
+        <div class="container custom-container " style="max-width: 1250px;">
+            <br><br>
+            <h1 class="fw-bolder"> Ajouter un nouvel point terminal à l'infrastructure</h1>
+            <hr><br>
+            <div class="mb-3">
+                <h3><label for="exampleInputTitle" class="form-label">Nom du client</label></h3>
+                <input type="text" class="form-control" id="exampleInputTitle" aria-describedby="emailHelp" name='title' >
+            </div>
+            <div class="mb-3">
+                <h3><label for="exampleInputContent" class="form-label">Adresse</label></h3>
+                <textarea class="form-control" id="exampleInputContent" rows="7" name='content' ></textarea>
+            </div>
+            <div class="mb-3">
+                <h3><label for="exampleInputRemarks" class="form-label">Remarques</label></h3>
+                <textarea class="form-control" id="exampleInputRemarks" rows="4" name='remarks' ></textarea>
+            </div>
+            <div class="mb-3" style="height: 400px;">
+                <h3><label for="exampleInputCoordinates" class="form-label">Coordonnées</label></h3>
+                <div id="map" style="height: 320px;"></div>
+                <input type="hidden" id="coordinates" name="coordinates">
+                <p id="coordinatesDisplay"></p> <!-- Element to display coordinates -->
+            </div>
+            <input class="btn btn-primary" type="submit" value="Ajouter">
+        </div>
+    </form>
+
+    <script src="{% static "js/leaflet.js" %}"></script>
+    <script>
+        var map = L.map('map', {
+            dragging: false  // Bloquer le déplacement de la carte
+        }).setView([36.8916, 10.1869], 15);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(map);
+
+        var marker;
+
+        map.on('click', function(e) {
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            marker = L.marker(e.latlng, {draggable: true}).addTo(map);
+            document.getElementById('coordinates').value = e.latlng.lat + ', ' + e.latlng.lng;
+
+            // Afficher les coordonnées lorsque l'utilisateur clique sur la carte
+            document.getElementById('coordinatesDisplay').innerText = 'Latitude: ' + e.latlng.lat + ', Longitude: ' + e.latlng.lng;
+
+            // Ajouter un événement de déplacement de marqueur pour mettre à jour les coordonnées lors du déplacement
+            marker.on('drag', function(event) {
+                var marker = event.target;
+                var position = marker.getLatLng();
+                document.getElementById('coordinates').value = position.lat + ', ' + position.lng;
+                document.getElementById('coordinatesDisplay').innerText = 'Latitude: ' + position.lat + ', Longitude: ' + position.lng;
+            });
+        });
+    </script>
+{% endblock  %}
+
+{% block styles %}
+  <style>
+    #map {
+        width: 800px;
+        height: 350px;
+    }
+  </style>
+{% endblock %}

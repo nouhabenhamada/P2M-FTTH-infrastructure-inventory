@@ -1,0 +1,59 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}home{% endblock %}
+
+{% block content %}
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+                <a class="nav-link dropdown-toggle bg-primary text-light w-100" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <h5 class='font-monospace'>Menu</h5>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="/new-post">Ajouter</a></li>
+                    <li><a class="dropdown-item" href="/signout">Déconnecter</a></li>
+                </ul>
+            </ul>
+            <img src="{% static "images/logo.png" %}" alt="Logo" style="max-height: 50px;">
+        </div>
+    </nav>
+    <div class="container custom-container" style="max-width: 1350px;">
+        <div style="border: 2px solid black; border-radius: 10px; padding: 10px; text-align: center;">
+            <a href="{% url 'map_page' %}" style="text-decoration: none; color: black; font-size: 20px;">Voir l'inventaire géolocalisé</a>
+        </div>
+    </div>
+    <br>
+    <br>
+    <div class="container custom-container" style="max-width: 1350px;">
+        {% for post in posts %}
+            <article class="media content-section">
+                <div class="media-body" style="border: 1px solid black; padding: 23px; margin-bottom: 10px;">
+                    <div class="article-metadata">
+                        <h1 class="text-uppercase" style="text-align: left; float: left; color: #000000;">{{ post.author }}</h1>
+                        <h5 style="text-align: right; float: right;">{{ post.data_posted }}</h5>
+                        <hr style="clear: both;">
+                    </div>
+                    <h3>{{ post.title }}</h3>
+                    <p class="article-content">{{ post.content }}</p>
+                    <p class="article-content">{{ post.remarks }}</p>
+                    <div id="map_{{ forloop.counter }}" style="height: 400px;"></div> 
+                    <script src="{% static "js/leaflet.js" %}"></script>
+                    <script>
+                        var map{{ forloop.counter }} = L.map('map_{{ forloop.counter }}').setView([{{ post.latitude }}, {{ post.longitude }}], 13);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            maxZoom: 19,
+                        }).addTo(map{{ forloop.counter }});
+                        L.marker([{{ post.latitude }}, {{ post.longitude }}]).addTo(map{{ forloop.counter }})
+                            .bindPopup("<b>{{ post.title }}</b><br>{{ post.content }}").openPopup();
+                    </script>
+                    <br><br>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+   
+    
